@@ -1,0 +1,15 @@
+torch
+transformers
+accelerate
+datasets
+python-dotenv
+torchaudio
+librosa
+scikit-learn
+pandas
+numpy
+gradio
+wandb
+matplotlib
+seaborn
+evaluate

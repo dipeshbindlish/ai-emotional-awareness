@@ -1,0 +1,20 @@
+# virtual envs
+venv/
+mlenv/
+
+# secrets
+.env
+
+# training outputs
+*_out*/
+
+# experiment tracking
+wandb/
+.gradio/
+__pycache__/
+
+# large model binaries anywhere
+*.bin
+*.pt
+*.pth
+*.safetensors
