@@ -1,8 +1,12 @@
 import gradio as gr
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 import torch
+from dotenv import load_dotenv
+import os
 
-model_path = "text_out/checkpoint-2000"
+load_dotenv()
+
+model_path = os.getenv("TEXT_MODEL_PATH")
 label_names = ["sadness", "joy", "love", "anger", "fear", "surprise"]
 
 tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")

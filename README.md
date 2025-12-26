@@ -3,22 +3,20 @@ AI Emotional Awareness Model (Text + Audio MVP)
 Install:
 pip install -r requirements.txt
 
-Train text:
-python src/training/train_text.py
-python -m src.training.train_text
+Text:
+python -m src.text.train_text
+python -m src.text.app
 
-Train audio:
-python src/training/train_audio.py
-python -m src.training.train_audio
+Audio:
+python -m src.audio.train_audio
+python -m src.audio.app
 
-Run API:
+Run APP:
 python app.py
 
 WSL:
 source ~/mlenv/bin/activate
 cd /mnt/e/ai-emotional-awareness/
-python -m src.training.train_text
-
 
 
 Jupyter Notebook Install and Run in WSL:
