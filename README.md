@@ -17,7 +17,7 @@ python app.py
 WSL:
 source ~/mlenv/bin/activate
 cd /mnt/e/ai-emotional-awareness/
-
+watch -n 1 nvidia-smi
 
 Jupyter Notebook Install and Run in WSL:
 pip install notebook ipykernel
@@ -25,5 +25,3 @@ python -m ipykernel install --user --name wsl-ml --display-name "WSL ML"
 jupyter notebook --no-browser
 
 Select kernel → WSL ML
-
-watch -n 1 nvidia-smi

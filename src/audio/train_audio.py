@@ -45,17 +45,6 @@ samples = []
 for f in audio_files:
     samples.append({"path": str(f), "emotion": parse_emotion(f)})
 
-waveform, sr = sf.read(samples[0]["path"])
-if sr != 16000:
-    waveform_16k = librosa.resample(waveform, orig_sr=sr, target_sr=16000)
-    sr = 16000
-else:
-    waveform_16k = waveform
-
-processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base")
-
-inputs = processor(waveform_16k, sampling_rate=sr, return_tensors="pt", padding=True)
-
 labels = sorted(set(s["emotion"] for s in samples))
 label2id = {label: i for i, label in enumerate(labels)}
 id2label = {i: label for label, i in label2id.items()}
@@ -70,6 +59,12 @@ def encode_labels(example):
 
 dataset = dataset.map(encode_labels)
 dataset = dataset.train_test_split(test_size=0.2, seed=42)
+
+processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base")
+# Known undocumented issue: Wav2Vec2Processor  does not reliably honor sampling_rate passed during Dataset.map() on the first call (at line 90).
+# Although the constructor accepts it, correct behavior only applies from subsequent calls, which can silently break training.
+# Pre-setting sampling_rate here avoids that issue.
+processor.feature_extractor.sampling_rate = 16000
 
 
 def preprocess_audio(batch):
@@ -91,17 +86,22 @@ def preprocess_audio(batch):
         labels.append(label)
 
     inputs = processor(
-        waveforms, sampling_rate=16000, padding=True, return_tensors="pt"
+        waveforms,
+        sampling_rate=16000,
+        padding=False,
     )
 
     inputs["labels"] = labels
     return inputs
 
 
-dataset = dataset.map(
-    preprocess_audio, batched=True, batch_size=8, remove_columns=["path", "emotion"]
-)
 dataset.set_format("torch")
+dataset = dataset.map(
+    preprocess_audio,
+    batched=True,
+    batch_size=8,
+    remove_columns=["path", "emotion", "label"],
+)
 
 num_labels = len(label2id)
 
@@ -144,6 +144,7 @@ training_args = TrainingArguments(
     gradient_accumulation_steps=1,
     dataloader_num_workers=2,  # speed up data loading
     dataloader_pin_memory=True,  # speed up data transfer to GPU
+    save_total_limit=1,  # This is the "Cleanup" command to limit the total amount of stored checkpoints.
     num_train_epochs=10,
     logging_steps=10,
     report_to=[],
@@ -176,3 +177,4 @@ trainer = Trainer(
 trainer.train()
 metrics = trainer.evaluate()
 print(metrics)
+# trainer.save_model("audio_out/best_model")
